@@ -1,0 +1,6 @@
+ef_init_(selt,sabor)
+selt.sabor = sabor 
+def sabor(self):
+    return f"el sabor es:(self.sabor)"
+s = galleta("vainilla con coco");
+print(s.sabor) 
