@@ -1,0 +1,194 @@
+namespace TallerHotel
+{
+    public class HabitacionHotel
+    {
+        // 1. ATRIBUTOS PRIVADOS
+        
+        private int numero;
+        private string tipo;
+        private double precioPorNoche;
+        private bool disponible;
+        private string clienteActual;
+
+        // 2. PROPIEDADES PÚBLICAS
+        
+        public int Numero
+        {
+            get { return numero; }
+        }
+
+        public string Tipo
+        {
+            get { return tipo; }
+            set
+            {
+                if (value == "Individual" || value == "Doble" || value == "Suite")
+                {
+                    tipo = value;
+                }
+                else
+                {
+                    Console.WriteLine($"Error: Tipo '{value}' no válido. Solo se permite Individual, Doble o Suite.");
+                }
+            }
+        }
+
+        public double PrecioPorNoche
+        {
+            get { return precioPorNoche; }
+            set
+            {
+                if (value > 0)
+                {
+                    precioPorNoche = value;
+                }
+                else
+                {
+                    Console.WriteLine("Error: El precio por noche debe ser mayor a 0.");
+                }
+            }
+        }
+
+        public bool Disponible
+        {
+            get { return disponible; }
+        }
+
+        public string ClienteActual
+        {
+            get { return clienteActual; }
+        }
+
+        // 3. CONSTRUCTOR
+        
+        public HabitacionHotel(int numero, string tipo, double precioPorNoche)
+        {
+            this.numero = numero;
+            this.Tipo = tipo; // Usa la propiedad con validación
+            this.PrecioPorNoche = precioPorNoche; // Usa la propiedad con validación
+            this.disponible = true;
+            this.clienteActual = "";
+        }
+
+        // 4. MÉTODOS CON LÓGICA
+        
+        public double Reservar(string nombreCliente, int noches)
+        {
+            if (disponible)
+            {
+                disponible = false;
+                clienteActual = nombreCliente;
+                double costoTotal = precioPorNoche * noches;
+                return costoTotal;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        public bool Liberar()
+        {
+            if (!disponible) // Si está ocupada
+            {
+                disponible = true;
+                clienteActual = "";
+                return true;
+            }
+            else // Si ya estaba libre
+            {
+                return false;
+            }
+        }
+
+        public string MostrarInfo()
+        {
+            string estado = disponible ? "Disponible" : $"Ocupada por {clienteActual}";
+            return $"Habitación {numero} - Tipo: {tipo} - Precio: ${precioPorNoche:N0} por noche - Estado: {estado}";
+        }
+
+        public void AplicarDescuento(int porcentaje)
+        {
+            if (porcentaje < 0 || porcentaje > 100) return;
+
+            double descuento = precioPorNoche * (porcentaje / 100.0);
+            double nuevoPrecio = precioPorNoche - descuento;
+
+            if (nuevoPrecio < 0)
+            {
+                precioPorNoche = 0;
+            }
+            else
+            {
+                precioPorNoche = nuevoPrecio;
+            }
+        }
+    }
+
+    // PROGRAMA PRINCIPAL (Main)
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // 1. Instanciar al menos 3 habitaciones
+            
+            HabitacionHotel hab101 = new HabitacionHotel(101, "Individual", 50000);
+            HabitacionHotel hab202 = new HabitacionHotel(202, "Doble", 80000);
+            HabitacionHotel hab303 = new HabitacionHotel(303, "Suite", 150000);
+
+            HabitacionHotel[] habitaciones = { hab101, hab202, hab303 };
+
+            // 2. Mostrar estado inicial
+            
+            Console.WriteLine("=== ESTADO INICIAL ===");
+            foreach (var h in habitaciones)
+            {
+                Console.WriteLine(h.MostrarInfo());
+            }
+
+            Console.WriteLine("\n=== SIMULANDO ACCIONES ===");
+            
+            // 3. Simular acciones
+            
+            double costo = hab101.Reservar("Juana Pérez", 3);
+            Console.WriteLine($"Reserva 101 para Juana Pérez por 3 noches -> Costo total: ${costo:N0}");
+
+            costo = hab202.Reservar("Luis Gómez", 2);
+            Console.WriteLine($"Reserva 202 para Luis Gómez por 2 noches -> Costo total: ${costo:N0}");
+
+            costo = hab101.Reservar("Otro Cliente", 1);
+            if (costo == -1)
+            {
+                Console.WriteLine("Intentar reservar la 101 nuevamente -> FALLÓ (ya está ocupada, retorna -1)");
+            }
+
+            bool liberada = hab101.Liberar();
+            Console.WriteLine($"Liberar la 101 -> {(liberada ? "Éxito" : "Ya estaba libre")}");
+
+            hab303.AplicarDescuento(10);
+            Console.WriteLine($"Aplicar descuento del 10% a la 303 -> Nuevo precio: ${hab303.PrecioPorNoche:N0}");
+
+            costo = hab101.Reservar("Carlos Ruiz", 1);
+            Console.WriteLine($"Reservar la 101 para Carlos Ruiz por 1 noche -> Costo total: ${costo:N0}");
+
+            // 4. Mostrar estado después de operaciones
+            
+            Console.WriteLine("\n=== ESTADO FINAL ===");
+            foreach (var h in habitaciones)
+            {
+                Console.WriteLine(h.MostrarInfo());
+            }
+
+            // 5. Mostrar cuántas están ocupadas
+            
+            int ocupadas = 0;
+            foreach (var h in habitaciones)
+            {
+                if (!h.Disponible) ocupadas++;
+            }
+            Console.WriteLine($"\n>>> Total de habitaciones ocupadas: {ocupadas} de {habitaciones.Length}");
+
+            Console.ReadKey();
+        }
+    }
+}
